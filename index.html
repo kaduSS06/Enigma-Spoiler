@@ -14,24 +14,21 @@
             font-family: 'Montserrat', sans-serif;
             background-color: #050505; color: white;
             user-select: none; -webkit-tap-highlight-color: transparent;
-            /* Centraliza o jogo na tela */
             display: flex; align-items: center; justify-content: center;
         }
 
         /* === CONTAINER RESPONSIVO === */
-        /* Mantém a proporção da imagem para a mira não sair do lugar */
         #game-container {
             position: relative;
             width: 100%;
             max-width: 1200px; 
-            aspect-ratio: 16 / 9; /* Proporção padrão da imagem */
+            aspect-ratio: 16 / 9; 
             max-height: 100vh;
             background: url('fundo.jpg') no-repeat center center;
             background-size: contain; 
-            transition: filter 1s, opacity 1s;
+            transition: filter 1.5s ease-in-out, opacity 1.5s ease-in-out; /* Transição suave */
         }
 
-        /* Ajuste para telas muito altas (celulares) para ocupar melhor o espaço */
         @media (max-aspect-ratio: 16/9) {
             #game-container {
                 width: 100%;
@@ -50,22 +47,13 @@
             z-index: 20;
         }
 
-        /* === POSIÇÕES FINAIS (Ajustadas) === */
-        
-        /* Galo */
+        /* === POSIÇÕES === */
         #rooster-spot {
-            top: 38%; 
-            left: 12%; /* Posição ajustada */
-            width: 18%; 
-            height: 28%;
+            top: 38%; left: 12%; width: 18%; height: 28%;
         }
 
-        /* Pato */
         #duck-spot {
-            top: 40%; 
-            right: 12%; /* Posição ajustada */
-            width: 18%; 
-            height: 28%;
+            top: 40%; right: 12%; width: 18%; height: 28%;
         }
 
         /* === INTERFACE (UI) === */
@@ -76,14 +64,12 @@
             pointer-events: none; text-align: center;
         }
 
+        /* O Título agora serve só de espaço, nunca aparece */
         h1.spoiler-title {
-            font-size: 5vw; /* Texto responsivo */
+            font-size: 5vw; 
             margin-bottom: 2rem; opacity: 0; pointer-events: none;
         }
         
-        .blink-fast { animation: blinkFast 0.2s infinite !important; opacity: 1 !important; color: white; text-shadow: 0 0 20px white; }
-        @keyframes blinkFast { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
-
         .input-area {
             pointer-events: auto;
             display: flex; flex-direction: column; align-items: center; gap: 15px;
@@ -122,7 +108,7 @@
         <div class="click-spot" id="duck-spot"></div>
 
         <div class="ui-layer" id="game-ui">
-            <h1 class="spoiler-title" id="main-title">SPOILER</h1> 
+            <h1 class="spoiler-title">SPOILER</h1> 
             <div class="input-area">
                 <input type="text" id="spoiler-input" placeholder="Tente evitar o spoiler..." autocomplete="off">
                 <div class="feedback-text" id="feedback"></div>
@@ -176,39 +162,59 @@
             const container = document.getElementById('game-container');
             const ui = document.getElementById('game-ui');
             const endScreen = document.getElementById('end-screen');
-            const title = document.getElementById('main-title');
 
-            title.classList.add('blink-fast');
-            
+            // 1. Inicia o escurecimento da tela (sem piscar texto)
             setTimeout(() => {
                 container.style.filter = "grayscale(100%) brightness(0%)";
-                ui.style.opacity = 0;
+                ui.style.opacity = 0; // Interface some suavemente
+                
+                // Desativa cliques para não atrapalhar
                 document.getElementById('rooster-spot').style.display = 'none';
                 document.getElementById('duck-spot').style.display = 'none';
-            }, 800);
+            }, 500);
 
+            // 2. Aparece a tela final
             setTimeout(() => {
                 endScreen.style.opacity = 1;
                 endScreen.style.pointerEvents = "auto";
             }, 2000);
 
+            // 3. Revela o número
             setTimeout(() => {
                 document.getElementById('final-digit').classList.add('show');
             }, 3500);
         }
 
+        // LÓGICA DE TEXTO (ORIGINAL)
         const input = document.getElementById('spoiler-input');
         const feedback = document.getElementById('feedback');
+        
         input.addEventListener('keyup', (e) => {
             if (e.key === 'Enter' || e.target.value.length > 0) {
+                const val = input.value.toLowerCase().trim();
+                
+                if (window.feedbackTimeout) clearTimeout(window.feedbackTimeout);
+
+                if (val === '') {
+                    feedback.style.opacity = 0;
+                    return;
+                }
+
                 feedback.style.opacity = 1;
-                const val = input.value.toLowerCase();
-                if(val.includes('galo') || val.includes('pato')) {
-                    feedback.innerText = "Sim! Toque neles na imagem.";
+
+                if (val.includes('galo') && val.includes('pato')) {
+                    feedback.innerText = "Boa tentativa... mas spoilers não se derrotam só escrevendo.";
+                } else if (val.includes('galo')) {
+                    feedback.innerText = "Você está perto... mas falta alguém.";
+                } else if (val.includes('pato')) {
+                    feedback.innerText = "Quase lá... mas isso não é o suficiente.";
                 } else {
                     feedback.innerText = "Não adianta... fugir do spoiler nunca funciona.";
                 }
-                setTimeout(() => { feedback.style.opacity = 0; }, 4000);
+
+                window.feedbackTimeout = setTimeout(() => {
+                    feedback.style.opacity = 0;
+                }, 4000);
             }
         });
     </script>
