@@ -163,14 +163,11 @@ html, body {
 </div>
 
 <script>
-const values = [0,0,0,0,0];
-
-// senha FINAL (exemplo)
-const correct = [6, ?, ?, ?, ?]; // depois você preenche
+const values = [0, 0, 0, 0, 0];
 
 function change(index, delta) {
     values[index] = (values[index] + delta + 10) % 10;
-    const el = document.getElementById('n'+index);
+    const el = document.getElementById('n' + index);
     el.textContent = values[index];
     el.style.transform = 'scale(1.2)';
     setTimeout(() => el.style.transform = 'scale(1)', 120);
@@ -180,9 +177,15 @@ function tryOpen() {
     const safe = document.getElementById('safe');
     const msg = document.getElementById('msg');
 
-    // Mesmo se acertar, NÃO abre (narrativa)
     safe.classList.add('shake');
     setTimeout(() => safe.classList.remove('shake'), 400);
+
+    msg.textContent = 'Ainda não.';
+}
+</script>
+
+</body>
+</html>    setTimeout(() => safe.classList.remove('shake'), 400);
 
     msg.textContent = 'Ainda não.';
 }
