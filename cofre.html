@@ -12,6 +12,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
@@ -20,6 +21,7 @@ html, body {
   background: black;
   font-family: 'Montserrat', sans-serif;
   overflow: hidden;
+  touch-action: manipulation;
 }
 
 /* ===== STORY ===== */
@@ -38,6 +40,18 @@ html, body {
   opacity: 1;
   transition: opacity 2s ease;
   z-index: 10;
+}
+
+.story-line {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1.5s ease, transform 1.5s ease;
+  margin-bottom: 30px;
+}
+
+.story-line.active {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ===== LUZ ===== */
@@ -230,9 +244,15 @@ html, body {
   backdrop-filter: blur(5px);
   border-radius: 30px;
   z-index: 3;
+  -webkit-appearance: none;
+  touch-action: manipulation;
+  user-select: none;
+  min-height: 44px;
+  min-width: 44px;
 }
 
-#approach-button:hover {
+#approach-button:hover,
+#approach-button:active {
   background: rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.9);
   border-color: rgba(255, 255, 255, 0.4);
@@ -268,6 +288,7 @@ html, body {
   width: 220px;
   cursor: pointer;
   transition: transform 0.4s ease;
+  touch-action: manipulation;
 }
 
 #chest:hover {
@@ -299,12 +320,15 @@ html, body {
 
 .lock-box {
   text-align: center;
+  width: 90%;
+  max-width: 400px;
 }
 
 .lock-box h2 {
   font-weight: 300;
   margin-bottom: 30px;
   letter-spacing: 2px;
+  font-size: 1.2rem;
 }
 
 /* ===== TRAVA VERTICAL ===== */
@@ -312,12 +336,14 @@ html, body {
   display: flex;
   gap: 12px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .digit {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 60px;
 }
 
 .digit button {
@@ -326,6 +352,10 @@ html, body {
   color: #888;
   font-size: 1.4rem;
   cursor: pointer;
+  padding: 10px;
+  touch-action: manipulation;
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .digit span {
@@ -333,6 +363,10 @@ html, body {
   margin: 8px 0;
   width: 24px;
   text-align: center;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ===== FEEDBACK ===== */
@@ -342,18 +376,55 @@ html, body {
   color: #777;
   min-height: 20px;
 }
+
+/* Media Queries para celular */
+@media (max-width: 768px) {
+  #story {
+    font-size: 1.1rem;
+    padding: 20px;
+  }
+  
+  .story-line {
+    margin-bottom: 20px;
+  }
+  
+  .lock {
+    gap: 8px;
+  }
+  
+  .digit {
+    min-width: 50px;
+  }
+  
+  .digit button {
+    font-size: 1.2rem;
+    padding: 8px;
+  }
+  
+  .digit span {
+    font-size: 1.8rem;
+  }
+  
+  #approach-button {
+    bottom: 60px;
+    padding: 15px 40px;
+    font-size: 1rem;
+  }
+  
+  #css-chest-container {
+    transform: scale(0.9);
+  }
+}
 </style>
 </head>
 
 <body>
 
-<!-- STORY -->
+<!-- STORY com frases separadas -->
 <div id="story">
-  <p>
-    Não foi feito para ser encontrado.<br><br>
-    Ainda assim, alguém deixou isso aqui.<br><br>
-    Cinco números guardam o que foi deixado.
-  </p>
+  <div class="story-line" id="line1">Não foi feito para ser encontrado.</div>
+  <div class="story-line" id="line2">Ainda assim, alguém deixou isso aqui.</div>
+  <div class="story-line" id="line3">Cinco números guardam o que foi deixado.</div>
 </div>
 
 <!-- LUZ -->
@@ -418,7 +489,11 @@ html, body {
 <audio id="ambient" src="ambiente.mp3" loop></audio>
 
 <script>
+// Elementos DOM
 const story = document.getElementById("story");
+const line1 = document.getElementById("line1");
+const line2 = document.getElementById("line2");
+const line3 = document.getElementById("line3");
 const light = document.getElementById("light-layer");
 const fadeBlack = document.getElementById("fade-black");
 const darkRoom = document.getElementById("dark-room");
@@ -435,51 +510,90 @@ const ambient = document.getElementById("ambient");
 const PASSWORD = [6, 2, 1, 4, 9];
 let digits = [0, 0, 0, 0, 0];
 
-// iniciar som após interação
-document.body.addEventListener("click", () => {
-  ambient.volume = 0.4;
-  ambient.play();
-}, { once: true });
+// Função para ativar som após interação
+function startAmbientSound() {
+  if (ambient.paused) {
+    ambient.volume = 0.4;
+    ambient.play().catch(e => console.log("Som precisa de interação do usuário"));
+  }
+}
+
+// Ativar som no primeiro toque
+document.addEventListener('touchstart', startAmbientSound, { once: true });
+document.addEventListener('click', startAmbientSound, { once: true });
 
 // Sequência narrativa aprimorada
-setTimeout(() => {
-  story.style.opacity = 0; // Fade out do prólogo
-}, 6000);
-
-setTimeout(() => {
-  light.style.opacity = 1; // Luz do prólogo
-}, 8000);
-
-setTimeout(() => {
-  // 1️⃣ Fade para preto completo
-  fadeBlack.style.opacity = 1;
-  fadeBlack.style.pointerEvents = "auto";
-}, 11000);
-
-setTimeout(() => {
-  // 2️⃣ Cena da sala escura
-  fadeBlack.style.opacity = 0;
-  darkRoom.style.opacity = 1;
-  darkRoom.style.pointerEvents = "auto";
-  
-  // Acender luz gradualmente
+function startStorySequence() {
+  // Primeira frase aparece imediatamente
   setTimeout(() => {
-    roomLight.style.opacity = 1;
-  }, 500);
+    line1.classList.add('active');
+  }, 1000);
   
-  // Revelar cofre desenhado em CSS
+  // Segunda frase após 3 segundos
   setTimeout(() => {
-    cssChestContainer.style.opacity = 1;
-  }, 2000);
+    line2.classList.add('active');
+  }, 4000);
   
-  // Mostrar botão de aproximação
+  // Terceira frase após 6 segundos
   setTimeout(() => {
-    approachButton.style.opacity = 1;
-  }, 3500);
-}, 13000);
+    line3.classList.add('active');
+  }, 7000);
+  
+  // Fade out do prólogo após 10 segundos
+  setTimeout(() => {
+    story.style.opacity = 0;
+  }, 10000);
+  
+  // Luz do prólogo
+  setTimeout(() => {
+    light.style.opacity = 1;
+  }, 12000);
+  
+  // Fade para preto
+  setTimeout(() => {
+    fadeBlack.style.opacity = 1;
+    fadeBlack.style.pointerEvents = "auto";
+  }, 13000);
+  
+  // Cena da sala escura
+  setTimeout(() => {
+    fadeBlack.style.opacity = 0;
+    darkRoom.style.opacity = 1;
+    darkRoom.style.pointerEvents = "auto";
+    
+    // Acender luz gradualmente
+    setTimeout(() => {
+      roomLight.style.opacity = 1;
+    }, 500);
+    
+    // Revelar cofre desenhado em CSS
+    setTimeout(() => {
+      cssChestContainer.style.opacity = 1;
+    }, 2000);
+    
+    // Mostrar botão de aproximação
+    setTimeout(() => {
+      approachButton.style.opacity = 1;
+      approachButton.style.pointerEvents = "auto";
+    }, 3500);
+  }, 15000);
+}
 
-// 4️⃣ Interação: aproximar-se do cofre
-approachButton.addEventListener("click", () => {
+// Iniciar sequência
+startStorySequence();
+
+// CORREÇÃO: Botão de aproximação para celular
+approachButton.addEventListener('click', handleApproachButton);
+approachButton.addEventListener('touchstart', handleApproachButton);
+
+function handleApproachButton(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  // Remover ouvintes para evitar múltiplos cliques
+  approachButton.removeEventListener('click', handleApproachButton);
+  approachButton.removeEventListener('touchstart', handleApproachButton);
+  
   // 5️⃣ Transição para a tela da senha
   darkRoom.style.opacity = 0;
   darkRoom.style.pointerEvents = "none";
@@ -489,7 +603,7 @@ approachButton.addEventListener("click", () => {
     lockScreen.style.pointerEvents = "auto";
     renderLock();
   }, 1500);
-});
+}
 
 // criar tranca (mantido do código original)
 function renderLock() {
@@ -501,14 +615,22 @@ function renderLock() {
 
     const up = document.createElement("button");
     up.innerHTML = "▲";
-    up.onclick = () => changeDigit(i, 1);
+    up.addEventListener('click', () => changeDigit(i, 1));
+    up.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      changeDigit(i, 1);
+    });
 
     const span = document.createElement("span");
     span.textContent = num;
 
     const down = document.createElement("button");
     down.innerHTML = "▼";
-    down.onclick = () => changeDigit(i, -1);
+    down.addEventListener('click', () => changeDigit(i, -1));
+    down.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      changeDigit(i, -1);
+    });
 
     d.appendChild(up);
     d.appendChild(span);
@@ -537,7 +659,7 @@ function checkPassword() {
 }
 
 // Clique no cofre (código original mantido para compatibilidade)
-chest.addEventListener("click", () => {
+chest.addEventListener('click', () => {
   chestScene.style.opacity = 0;
   chestScene.style.pointerEvents = "none";
 
@@ -547,6 +669,22 @@ chest.addEventListener("click", () => {
     renderLock();
   }, 1200);
 });
+
+// Para toque no celular
+chest.addEventListener('touchstart', (e) => {
+  e.preventDefault();
+  chestScene.style.opacity = 0;
+  chestScene.style.pointerEvents = "none";
+
+  setTimeout(() => {
+    lockScreen.style.opacity = 1;
+    lockScreen.style.pointerEvents = "auto";
+    renderLock();
+  }, 1200);
+});
+
+// Iniciar a trava (caso entre diretamente na tela)
+renderLock();
 </script>
 
 </body>
