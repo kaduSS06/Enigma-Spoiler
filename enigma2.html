@@ -1,9 +1,337 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-<title>New File</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enigma de Conexão</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden; /* Evita barras de rolagem */
+        }
+
+        /* --- Configuração do Fundo --- */
+        #background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* IMPORTANTE: O nome do arquivo deve ser exatamente este */
+            background: url('image_10.png') no-repeat center center;
+            background-size: cover;
+            z-index: -1;
+        }
+
+        /* --- Overlay de Sucesso (Animação de Brilho) --- */
+        #success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Permite clicar através dele */
+            opacity: 0;
+            transition: opacity 1s ease;
+            z-index: 10;
+            /* Gradiente radial que vai pulsar */
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(147,112,219,0.1) 60%, transparent 100%);
+        }
+
+        #success-overlay.active {
+            opacity: 1;
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+
+        /* --- Container Principal do Conteúdo --- */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            z-index: 20; /* Garante que fique acima do fundo */
+        }
+
+        /* Estilo do Título */
+        h1.title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+        }
+
+        /* Container do Input e Botão */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.15); /* Fundo semi-transparente */
+            padding: 10px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px); /* Efeito de desfoque moderno */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        input[type="text"] {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            outline: none;
+            font-size: 1rem;
+            font-family: 'Montserrat', sans-serif;
+            width: 250px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        button#confirm-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            background-color: #6a5acd; /* Um roxo/azul moderno */
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        button#confirm-btn:hover {
+            background-color: #836FFF;
+            transform: translateY(-2px);
+        }
+
+        /* Mensagens de Feedback */
+        #feedback-message {
+            margin-top: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-height: 1.4em; /* Reserva espaço para não pular a tela */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+        }
+        .feedback-success { color: #7FFF00; } /* Verde claro */
+        .feedback-error { color: #FFD700; }   /* Amarelo/Dourado */
+
+        /* --- Área de Dicas --- */
+        #hint-wrapper {
+            margin-top: 30px;
+            min-height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #hint-text {
+            font-size: 1rem;
+            font-style: italic;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 20px;
+            border-radius: 10px;
+            opacity: 0; /* Começa invisível para transição */
+            transition: opacity 0.5s ease;
+            max-width: 80%;
+        }
+
+        /* Botão de Dicas (Canto Inferior Direito) */
+        #hint-toggle-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 12px 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            display: none; /* Oculto inicialmente */
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            z-index: 30;
+        }
+
+        #hint-toggle-btn:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+            border-color: white;
+        }
+
+        /* Responsividade básica para celulares */
+        @media (max-width: 600px) {
+            h1.title { font-size: 1.8rem; }
+            .input-group { flex-direction: column; padding: 15px; border-radius: 20px; }
+            input[type="text"] { width: 100%; text-align: center; margin-bottom: 10px; }
+            button#confirm-btn { width: 100%; }
+            #hint-toggle-btn { bottom: 20px; right: 20px; padding: 10px 15px; font-size: 0.9rem; }
+        }
+    </style>
 </head>
 <body>
-<h1>Hello World</h1>
+
+    <div id="background-container"></div>
+    <div id="success-overlay"></div>
+
+    <div class="main-content">
+        <h1 class="title">O que conecta tudo isso?</h1>
+
+        <div class="input-group" id="input-area">
+            <input type="text" id="answer-input" placeholder="Digite sua resposta..." autocomplete="off">
+            <button id="confirm-btn">Confirmar</button>
+        </div>
+
+        <div id="feedback-message"></div>
+
+        <div id="hint-wrapper">
+            <div id="hint-text" style="display: none;"></div>
+        </div>
+    </div>
+
+    <button id="hint-toggle-btn">Quer dicas?</button>
+
+
+    <script>
+        // --- Configurações ---
+        // Respostas aceitas (deixe tudo em minúsculo aqui para facilitar a comparação)
+        const validAnswers = [
+            "bora assistir juntos?",
+            "bora assistir juntos", // Aceita sem interrogação também por flexibilidade
+            "bora ler juntos?",
+            "bora ler juntos"
+        ];
+
+        const hintsList = [
+            "Pense no que vocês sempre faziam quando viam ou liam as coisas dessas referências.",
+            "Não é um objeto… é algo que vocês combinavam de fazer.",
+            "É uma frase que vocês já trocaram algumas vezes."
+        ];
+
+        // --- Variáveis de Estado ---
+        let wrongAttempts = 0;
+        let currentHintIndex = 0;
+        let isSolved = false;
+
+        // --- Elementos do DOM ---
+        const inputField = document.getElementById('answer-input');
+        const confirmBtn = document.getElementById('confirm-btn');
+        const feedbackMsg = document.getElementById('feedback-message');
+        const hintToggleBtn = document.getElementById('hint-toggle-btn');
+        const hintTextDiv = document.getElementById('hint-text');
+        const successOverlay = document.getElementById('success-overlay');
+        const inputArea = document.getElementById('input-area');
+
+        // --- Funções ---
+
+        function checkAnswer() {
+            if (isSolved) return;
+
+            // Pega o valor, remove espaços extras nas pontas e converte para minúsculo
+            let userAnswer = inputField.value.trim().toLowerCase();
+
+            // Remove pontuação final extra se o usuário colocar (ex: "juntos." ou "juntos!")
+            userAnswer = userAnswer.replace(/[.!]$/, '');
+
+            if (validAnswers.includes(userAnswer)) {
+                handleSuccess();
+            } else {
+                handleError();
+            }
+        }
+
+        function handleSuccess() {
+            isSolved = true;
+            feedbackMsg.innerText = "Resposta correta!";
+            feedbackMsg.className = "feedback-success";
+            feedbackMsg.style.opacity = 1;
+
+            // Ativa a animação
+            successOverlay.classList.add('active');
+
+            // Esconde a área de input e dicas para limpar a tela
+            inputArea.style.display = 'none';
+            hintToggleBtn.style.display = 'none';
+            document.getElementById('hint-wrapper').style.display = 'none';
+        }
+
+        function handleError() {
+            feedbackMsg.innerText = "Hmm… não exatamente.";
+            feedbackMsg.className = "feedback-error";
+            feedbackMsg.style.opacity = 1;
+            
+            // Treme a caixa de input levemente
+            inputArea.style.transform = 'translateX(5px)';
+            setTimeout(() => { inputArea.style.transform = 'translateX(-5px)'; }, 100);
+            setTimeout(() => { inputArea.style.transform = 'translateX(0)'; }, 200);
+
+            wrongAttempts++;
+
+            // Mostra o botão de dicas após 2 erros
+            if (wrongAttempts >= 2) {
+                // Verifica se já não está visível para evitar re-animação
+                if (hintToggleBtn.style.display !== 'block') {
+                     hintToggleBtn.style.display = 'block';
+                     // Pequena animação de entrada para o botão
+                     hintToggleBtn.style.opacity = 0;
+                     hintToggleBtn.style.transform = 'translateY(20px)';
+                     setTimeout(() => {
+                        hintToggleBtn.style.opacity = 1;
+                        hintToggleBtn.style.transform = 'translateY(0)';
+                     }, 50);
+                }
+            }
+        }
+
+        function showNextHint() {
+            hintTextDiv.style.display = 'block';
+            // Fade out
+            hintTextDiv.style.opacity = 0;
+
+            setTimeout(() => {
+                // Atualiza o texto
+                hintTextDiv.innerText = `Dica ${currentHintIndex + 1}: ${hintsList[currentHintIndex]}`;
+                // Fade in
+                hintTextDiv.style.opacity = 1;
+
+                // Atualiza o índice para a próxima dica (volta ao zero se chegar no fim)
+                currentHintIndex = (currentHintIndex + 1) % hintsList.length;
+            }, 300); // Tempo para o fade out terminar
+        }
+
+        // --- Event Listeners ---
+
+        // Clicar no botão confirmar
+        confirmBtn.addEventListener('click', checkAnswer);
+
+        // Apertar Enter na caixa de texto
+        inputField.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') checkAnswer();
+        });
+
+        // Clicar no botão de dicas
+        hintToggleBtn.addEventListener('click', showNextHint);
+
+    </script>
 </body>
 </html>
