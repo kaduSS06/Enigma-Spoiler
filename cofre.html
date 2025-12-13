@@ -18,177 +18,217 @@ html, body {
     width: 100%;
     height: 100%;
     font-family: 'Montserrat', sans-serif;
-    background: #0e0e0e;
+    background: black;
+    color: white;
+    overflow: hidden;
+}
+
+/* ---------- PRÓLOGO ---------- */
+#intro {
+    position: fixed;
+    inset: 0;
+    background: black;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-/* COFRE */
-#safe {
-    width: 90%;
-    max-width: 360px;
-    background: linear-gradient(145deg, #1b1b1b, #111);
-    border-radius: 24px;
-    padding: 30px 20px;
-    box-shadow:
-        inset 0 0 20px rgba(255,255,255,0.05),
-        0 30px 60px rgba(0,0,0,0.6);
     text-align: center;
+    padding: 40px;
+    z-index: 100;
 }
 
-/* TÍTULO */
-#safe h1 {
-    color: #eee;
-    font-weight: 300;
-    font-size: 1.3rem;
-    margin-bottom: 25px;
+.intro-text {
+    font-size: 1.4rem;
+    opacity: 0;
+    transition: opacity 1.5s;
+    max-width: 600px;
+    line-height: 1.6;
 }
 
-/* DISCOS */
+/* ---------- BOTÃO ---------- */
+#start-btn {
+    position: absolute;
+    bottom: 12%;
+    padding: 14px 36px;
+    border: 1px solid white;
+    background: transparent;
+    color: white;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+/* ---------- COFRE ---------- */
+#vault {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, #222 0%, #000 70%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 2s ease;
+}
+
+#vault img {
+    width: 220px;
+    margin-bottom: 40px;
+}
+
+/* ---------- DÍGITOS ---------- */
 .dials {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
+    gap: 14px;
 }
 
 .dial {
-    width: 55px;
-    background: #222;
-    border-radius: 18px;
-    padding: 10px 0;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* BOTÕES */
 .dial button {
-    background: none;
-    border: none;
-    color: #aaa;
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 6px;
-}
-
-/* NÚMERO */
-.number {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #fff;
-    margin: 8px 0;
-    transition: transform 0.15s ease;
-}
-
-/* BOTÃO ABRIR */
-#try {
-    margin-top: 10px;
-    padding: 12px 30px;
-    border-radius: 30px;
-    border: 1px solid #aaa;
     background: transparent;
-    color: #eee;
-    font-size: 1rem;
+    border: none;
+    color: white;
+    font-size: 1.4rem;
     cursor: pointer;
 }
 
-/* MENSAGEM */
-#msg {
-    margin-top: 20px;
+.number {
+    font-size: 2.2rem;
+    margin: 8px 0;
+}
+
+/* ---------- TEXTO ---------- */
+.hint {
+    margin-top: 30px;
     font-size: 0.9rem;
-    color: #888;
-    min-height: 20px;
+    color: #aaa;
 }
 
-/* ANIMAÇÃO */
-.shake {
-    animation: shake 0.4s;
-}
-
-@keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-6px); }
-    50% { transform: translateX(6px); }
-    75% { transform: translateX(-6px); }
-    100% { transform: translateX(0); }
+/* ---------- SOM ---------- */
+audio {
+    display: none;
 }
 </style>
 </head>
-
 <body>
 
-<div id="safe">
-    <h1>O Cofre</h1>
+<!-- SOM -->
+<audio id="ambient" src="ambiente.mp3" loop></audio>
 
-    <div class="dials">
-        <div class="dial">
-            <button class="up" data-i="0">▲</button>
-            <div class="number" id="n0">0</div>
-            <button class="down" data-i="0">▼</button>
-        </div>
-        <div class="dial">
-            <button class="up" data-i="1">▲</button>
-            <div class="number" id="n1">0</div>
-            <button class="down" data-i="1">▼</button>
-        </div>
-        <div class="dial">
-            <button class="up" data-i="2">▲</button>
-            <div class="number" id="n2">0</div>
-            <button class="down" data-i="2">▼</button>
-        </div>
-        <div class="dial">
-            <button class="up" data-i="3">▲</button>
-            <div class="number" id="n3">0</div>
-            <button class="down" data-i="3">▼</button>
-        </div>
-        <div class="dial">
-            <button class="up" data-i="4">▲</button>
-            <div class="number" id="n4">0</div>
-            <button class="down" data-i="4">▼</button>
-        </div>
-    </div>
+<!-- PRÓLOGO -->
+<div id="intro">
+    <div class="intro-text" id="text"></div>
+    <button id="start-btn">Iniciar</button>
+</div>
 
-    <button id="try">Tentar abrir</button>
-    <div id="msg"></div>
+<!-- COFRE -->
+<div id="vault">
+    <img src="chest.png" alt="Cofre">
+
+    <div class="dials" id="dials"></div>
+
+    <div class="hint">Talvez nem tudo se abra de primeira.</div>
 </div>
 
 <script>
-const values = [0, 0, 0, 0, 0];
+const textEl = document.getElementById("text");
+const intro = document.getElementById("intro");
+const vault = document.getElementById("vault");
+const ambient = document.getElementById("ambient");
 
-function update(index) {
-    const el = document.getElementById('n' + index);
-    el.textContent = values[index];
-    el.style.transform = 'scale(1.2)';
-    setTimeout(() => el.style.transform = 'scale(1)', 120);
+const lines = [
+    "Algumas coisas não foram feitas para serem abertas de imediato.",
+    "Elas esperam.",
+    "Não por tempo...",
+    "Mas pela pessoa certa.",
+    "Este cofre ficou aqui por muito tempo.",
+    "Guardando fragmentos.",
+    "Começos.",
+    "Lembranças.",
+    "Se você está vendo isso agora...",
+    "Talvez seja porque chegou a hora de tentar."
+];
+
+let index = 0;
+
+function showNextLine() {
+    if (index >= lines.length) {
+        setTimeout(() => {
+            intro.style.opacity = 0;
+            setTimeout(() => {
+                intro.style.display = "none";
+                vault.style.opacity = 1;
+                vault.style.pointerEvents = "auto";
+            }, 2000);
+        }, 2000);
+        return;
+    }
+
+    textEl.style.opacity = 0;
+    setTimeout(() => {
+        textEl.innerText = lines[index];
+        textEl.style.opacity = 1;
+        index++;
+        setTimeout(showNextLine, 2800);
+    }, 800);
 }
 
-document.querySelectorAll('.up').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const i = btn.dataset.i;
-        values[i] = (values[i] + 1) % 10;
-        update(i);
-    });
+document.getElementById("start-btn").onclick = () => {
+    ambient.volume = 0;
+    ambient.play();
+
+    let v = 0;
+    const fade = setInterval(() => {
+        v += 0.02;
+        ambient.volume = Math.min(v, 0.6);
+        if (v >= 0.6) clearInterval(fade);
+    }, 100);
+
+    document.getElementById("start-btn").style.display = "none";
+    showNextLine();
+};
+
+/* ---------- COFRE ---------- */
+const PASSWORD = [6, 1, 4, 2, 9];
+const dials = document.getElementById("dials");
+let values = [0, 0, 0, 0, 0];
+
+values.forEach((_, i) => {
+    const dial = document.createElement("div");
+    dial.className = "dial";
+
+    const up = document.createElement("button");
+    up.innerText = "▲";
+    up.onclick = () => update(i, 1);
+
+    const num = document.createElement("div");
+    num.className = "number";
+    num.innerText = "0";
+
+    const down = document.createElement("button");
+    down.innerText = "▼";
+    down.onclick = () => update(i, -1);
+
+    dial.appendChild(up);
+    dial.appendChild(num);
+    dial.appendChild(down);
+    dials.appendChild(dial);
+
+    dial.num = num;
 });
 
-document.querySelectorAll('.down').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const i = btn.dataset.i;
-        values[i] = (values[i] + 9) % 10;
-        update(i);
-    });
-});
+function update(i, delta) {
+    values[i] = (values[i] + delta + 10) % 10;
+    dials.children[i].num.innerText = values[i];
 
-document.getElementById('try').addEventListener('click', () => {
-    const safe = document.getElementById('safe');
-    const msg = document.getElementById('msg');
-
-    safe.classList.add('shake');
-    setTimeout(() => safe.classList.remove('shake'), 400);
-
-    msg.textContent = 'Ainda não.';
-});
+    if (values.every((v, idx) => v === PASSWORD[idx])) {
+        alert("O cofre reagiu...");
+    }
+}
 </script>
 
 </body>
