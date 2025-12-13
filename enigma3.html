@@ -79,47 +79,6 @@ video {
     transition: opacity 2s ease;
 }
 
-/* CÍRCULO DO RAIO */
-#lightning-bolt {
-    position: absolute;
-
-    /* 🔧 AJUSTE A POSIÇÃO AQUI */
-    top: 65%;
-    left: 35%;
-
-    width: 15%;
-    aspect-ratio: 1 / 1;
-
-    border-radius: 50%;
-    pointer-events: none;
-
-    /* CENTRALIZA PELO CENTRO */
-    transform: translate(-50%, -50%);
-
-    opacity: 0;
-    transition: opacity 0.6s ease;
-}
-
-#lightning-bolt.active {
-    opacity: 1;
-    background: rgba(255, 215, 0, 0.25);
-    box-shadow:
-        0 0 20px rgba(255, 215, 0, 0.6),
-        0 0 40px rgba(255, 215, 0, 0.6),
-        0 0 80px rgba(255, 215, 0, 0.8);
-    animation: pulse 0.6s infinite alternate;
-}
-
-/* ANIMAÇÃO CORRIGIDA */
-@keyframes pulse {
-    from {
-        transform: translate(-50%, -50%) scale(1);
-    }
-    to {
-        transform: translate(-50%, -50%) scale(1.15);
-    }
-}
-
 /* UI */
 .ui-layer {
     position: absolute;
@@ -214,8 +173,6 @@ input {
 
 <!-- JOGO -->
 <div id="game-container">
-    <div id="lightning-bolt"></div>
-
     <div class="ui-layer" id="ui-box">
         <h2 class="question">Qual foi o começo?</h2>
         <input type="text" id="answer-input" placeholder="Digite..." autocomplete="off">
@@ -238,7 +195,6 @@ const videoContainer = document.getElementById('video-container');
 const video = document.getElementById('intro-video');
 const gameContainer = document.getElementById('game-container');
 const input = document.getElementById('answer-input');
-const bolt = document.getElementById('lightning-bolt');
 
 function startExperience() {
     videoContainer.style.opacity = 1;
@@ -251,6 +207,39 @@ video.onended = () => {
     videoContainer.style.opacity = 0;
     setTimeout(() => {
         videoContainer.style.display = 'none';
+        gameContainer.style.opacity = 1;
+    }, 1000);
+};
+
+input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkAnswer();
+});
+
+function checkAnswer() {
+    if (input.value.trim().toLowerCase() === 'senai') success();
+    else shake();
+}
+
+function shake() {
+    input.style.transform = 'translateX(5px)';
+    setTimeout(() => input.style.transform = 'translateX(-5px)', 50);
+    setTimeout(() => input.style.transform = 'translateX(0)', 100);
+}
+
+function success() {
+    document.getElementById('ui-box').style.opacity = 0;
+
+    setTimeout(() => {
+        const final = document.getElementById('final-sequence');
+        final.style.opacity = 1;
+        setTimeout(() => document.getElementById('end-phrase').style.opacity = 1, 1000);
+        setTimeout(() => document.getElementById('digit-box').style.opacity = 1, 3500);
+    }, 2000);
+}
+</script>
+
+</body>
+</html>.display = 'none';
         gameContainer.style.opacity = 1;
     }, 1000);
 };
