@@ -1,238 +1,296 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>O Começo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <style>
-        /* --- GERAL --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body, html {
-            height: 100%; width: 100%; overflow: hidden;
-            font-family: 'Montserrat', sans-serif;
-            background-color: #000; color: white;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>O Começo</title>
 
-        /* --- 1. TELA DE INÍCIO (Para liberar o áudio) --- */
-        #start-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 100;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-        .start-btn {
-            padding: 15px 40px; border: 1px solid white; background: transparent;
-            color: white; font-size: 1.2rem; cursor: pointer; border-radius: 30px;
-            transition: all 0.3s;
-        }
-        .start-btn:hover { background: white; color: black; }
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&display=swap" rel="stylesheet">
 
-        /* --- 2. VÍDEO --- */
-        #video-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 50; background: black; transition: opacity 2s ease;
-            display: none; /* Começa oculto até clicar em iniciar */
-        }
-        video {
-            width: 100%; height: 100%; object-fit: contain; /* Ajusta o vídeo sem cortar */
-        }
+<style>
+/* ===== GERAL ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* --- 3. O DESENHO E O JOGO --- */
-        #game-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            /* Fundo branco pois o desenho tem fundo branco */
-            background-color: #fff; 
-            background-image: url('desenho.jpg');
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain; /* Mostra o desenho inteiro */
-            z-index: 10; opacity: 0; transition: opacity 2s ease;
-        }
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Montserrat', sans-serif;
+    background: black;
+}
 
-        /* A "Máscara" do Raio (Ajuste a posição aqui se precisar) */
-        #lightning-bolt {
-            position: absolute;
-            /* Posições baseadas no seu desenho */
-            top: 60%; 
-            left: 35%;
-            width: 10%; 
-            height: 15%;
-            border-radius: 50%;
-            pointer-events: none;
-            /* Efeito inicial neutro */
-            mix-blend-mode: multiply; 
-            transition: all 1s ease;
-        }
+/* ===== TELA INICIAL ===== */
+#start-overlay {
+    position: fixed;
+    inset: 0;
+    background: black;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s;
+}
 
-        /* Animação do Raio quando acerta */
-        #lightning-bolt.active {
-            box-shadow: 0 0 50px 20px rgba(255, 215, 0, 0.8); /* Brilho Dourado */
-            background-color: rgba(255, 215, 0, 0.3);
-            transform: scale(1.5);
-            animation: electricPulse 0.5s infinite alternate;
-        }
-        @keyframes electricPulse {
-            from { opacity: 0.6; transform: scale(1.4); }
-            to { opacity: 1; transform: scale(1.6); }
-        }
+.start-btn {
+    padding: 15px 40px;
+    border-radius: 30px;
+    border: 1px solid white;
+    background: transparent;
+    color: white;
+    font-size: 1.2rem;
+}
 
-        /* Interface da Pergunta */
-        .ui-layer {
-            position: absolute; bottom: 10%; left: 0; width: 100%;
-            display: flex; flex-direction: column; align-items: center;
-            z-index: 20;
-        }
+.start-btn:active {
+    background: white;
+    color: black;
+}
 
-        h2.question {
-            color: #333; /* Texto escuro pois o fundo é branco */
-            margin-bottom: 20px; font-weight: 700; font-size: 1.5rem;
-            text-align: center;
-        }
+#status-msg {
+    margin-top: 20px;
+    color: #888;
+    font-size: 0.9rem;
+}
 
-        input {
-            padding: 10px 20px; border: 2px solid #333; border-radius: 30px;
-            background: transparent; color: #333; font-size: 1.1rem;
-            text-align: center; outline: none; font-family: 'Montserrat', sans-serif;
-            width: 80%; max-width: 300px; transition: transform 0.2s;
-        }
+/* ===== VÍDEO ===== */
+#video-container {
+    position: fixed;
+    inset: 0;
+    background: black;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 1s ease;
+}
 
-        /* --- 4. TELA FINAL --- */
-        #final-sequence {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: black; z-index: 80;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            opacity: 0; pointer-events: none; transition: opacity 2s ease;
-        }
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
 
-        .final-text {
-            color: #fff; font-size: 1.5rem; margin-bottom: 40px; opacity: 0;
-            transition: opacity 2s ease; font-weight: 300; text-align: center;
-        }
+/* ===== JOGO ===== */
+#game-container {
+    position: fixed;
+    inset: 0;
+    background: white;
+    background-image: url('desenho.jpg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 2s ease;
+}
 
-        .digit-reveal {
-            display: flex; flex-direction: column; align-items: center; opacity: 0; transition: opacity 2s ease;
-        }
-        .unlock-label { font-size: 0.8rem; letter-spacing: 4px; color: #888; text-transform: uppercase; margin-bottom: 10px; }
-        .number-6 {
-            font-size: 9rem; font-weight: 100; color: #fff;
-            text-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
-        }
+/* RAIO (ponto base) */
+#lightning-bolt {
+    position: absolute;
+    top: 65%;
+    left: 35%;
+    width: 10%;
+    height: 15%;
+    pointer-events: none;
+}
 
-        /* Responsividade */
-        @media (min-aspect-ratio: 16/9) {
-            /* Ajuste para PC se necessário */
-            #lightning-bolt { top: 65%; left: 42%; width: 5%; height: 20%; }
-        }
+/* CÍRCULO DE ENERGIA */
+#energy-circle {
+    position: absolute;
+    top: 63%;
+    left: 33%;
+    width: 18%;
+    height: 18%;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 215, 0, 0.8);
+    box-shadow:
+        0 0 20px rgba(255, 215, 0, 0.6),
+        0 0 60px rgba(255, 215, 0, 0.4);
+    opacity: 0;
+    transform: scale(0.6);
+    pointer-events: none;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
 
-    </style>
+#energy-circle.active {
+    opacity: 1;
+    transform: scale(1.1);
+    animation: energyPulse 0.8s infinite alternate;
+}
+
+@keyframes energyPulse {
+    from {
+        box-shadow:
+            0 0 25px rgba(255, 215, 0, 0.7),
+            0 0 70px rgba(255, 215, 0, 0.5);
+        transform: scale(1);
+    }
+    to {
+        box-shadow:
+            0 0 40px rgba(255, 215, 0, 0.9),
+            0 0 120px rgba(255, 215, 0, 0.7);
+        transform: scale(1.15);
+    }
+}
+
+/* UI */
+.ui-layer {
+    position: absolute;
+    bottom: 10%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.question {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+input {
+    width: 80%;
+    max-width: 300px;
+    padding: 12px 20px;
+    border-radius: 30px;
+    border: 2px solid #333;
+    font-size: 1.1rem;
+    text-align: center;
+    background: transparent;
+    outline: none;
+}
+
+/* ===== FINAL ===== */
+#final-sequence {
+    position: fixed;
+    inset: 0;
+    background: black;
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 2s ease;
+}
+
+.final-text {
+    color: white;
+    font-size: 1.5rem;
+    opacity: 0;
+    transition: opacity 2s ease;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.digit-reveal {
+    opacity: 0;
+    transition: opacity 2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.unlock-label {
+    font-size: 0.8rem;
+    letter-spacing: 4px;
+    color: #888;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.number-6 {
+    font-size: 9rem;
+    font-weight: 100;
+    color: white;
+    text-shadow: 0 0 40px rgba(255,255,255,0.8);
+}
+</style>
 </head>
+
 <body>
 
-    <div id="start-overlay">
-        <button class="start-btn" onclick="startExperience()">Iniciar Memória</button>
+<div id="start-overlay">
+    <button class="start-btn" onclick="startExperience()">Iniciar Memória</button>
+    <p id="status-msg"></p>
+</div>
+
+<div id="video-container">
+    <video id="intro-video" playsinline preload="auto">
+        <source src="video_intro.mp4" type="video/mp4">
+    </video>
+</div>
+
+<div id="game-container">
+    <div id="lightning-bolt"></div>
+    <div id="energy-circle"></div>
+
+    <div class="ui-layer" id="ui-box">
+        <h2 class="question">Qual foi o começo?</h2>
+        <input id="answer-input" type="text" placeholder="Digite..." autocomplete="off">
     </div>
+</div>
 
-    <div id="video-container">
-        <video id="intro-video" playsinline>
-            <source src="video_intro.mp4" type="video/mp4">
-        </video>
+<div id="final-sequence">
+    <p class="final-text" id="end-phrase">Foi ali que tudo começou.</p>
+    <div class="digit-reveal" id="digit-box">
+        <span class="unlock-label">Dígito desbloqueado</span>
+        <span class="number-6">6</span>
     </div>
+</div>
 
-    <div id="game-container">
-        <div id="lightning-bolt"></div>
+<script>
+const overlay = document.getElementById('start-overlay');
+const videoContainer = document.getElementById('video-container');
+const video = document.getElementById('intro-video');
+const gameContainer = document.getElementById('game-container');
+const input = document.getElementById('answer-input');
+const circle = document.getElementById('energy-circle');
 
-        <div class="ui-layer" id="ui-box">
-            <h2 class="question">Qual foi o começo?</h2>
-            <input type="text" id="answer-input" placeholder="Digite..." autocomplete="off">
-        </div>
-    </div>
+function startExperience() {
+    videoContainer.style.opacity = 1;
+    video.play().then(() => {
+        overlay.style.opacity = 0;
+        setTimeout(() => overlay.style.display = 'none', 500);
+    });
+}
 
-    <div id="final-sequence">
-        <p class="final-text" id="end-phrase">Foi ali que tudo começou.</p>
-        <div class="digit-reveal" id="digit-box">
-            <span class="unlock-label">Dígito Desbloqueado</span>
-            <span class="number-6">6</span>
-        </div>
-    </div>
+video.onended = () => {
+    videoContainer.style.opacity = 0;
+    setTimeout(() => {
+        videoContainer.style.display = 'none';
+        gameContainer.style.opacity = 1;
+    }, 1000);
+};
 
-    <script>
-        const videoContainer = document.getElementById('video-container');
-        const video = document.getElementById('intro-video');
-        const gameContainer = document.getElementById('game-container');
-        const input = document.getElementById('answer-input');
-        const bolt = document.getElementById('lightning-bolt');
-        
-        // --- 1. Iniciar Experiência ---
-        function startExperience() {
-            document.getElementById('start-overlay').style.display = 'none';
-            videoContainer.style.display = 'block';
-            video.play();
-        }
+input.addEventListener('keyup', e => {
+    if (e.key === 'Enter') checkAnswer();
+});
 
-        // --- 2. Quando o vídeo acaba ---
-        video.onended = function() {
-            videoContainer.style.opacity = 0; // Fade out vídeo
-            setTimeout(() => {
-                videoContainer.style.display = 'none';
-                gameContainer.style.opacity = 1; // Fade in Desenho
-            }, 1500);
-        };
+function checkAnswer() {
+    if (input.value.trim().toLowerCase() === 'senai') {
+        success();
+    } else {
+        input.style.transform = 'translateX(5px)';
+        setTimeout(() => input.style.transform = 'translateX(-5px)', 50);
+        setTimeout(() => input.style.transform = 'translateX(0)', 150);
+    }
+}
 
-        // --- 3. Lógica do Jogo ---
-        input.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') checkAnswer();
-        });
+function success() {
+    document.getElementById('ui-box').style.opacity = 0;
+    circle.classList.add('active');
 
-        function checkAnswer() {
-            const val = input.value.trim().toLowerCase();
+    setTimeout(showFinal, 2500);
+}
 
-            if (val === 'senai') {
-                handleSuccess();
-            } else {
-                handleError();
-            }
-        }
+function showFinal() {
+    const final = document.getElementById('final-sequence');
+    final.style.opacity = 1;
+    setTimeout(() => document.getElementById('end-phrase').style.opacity = 1, 1000);
+    setTimeout(() => document.getElementById('digit-box').style.opacity = 1, 4000);
+}
+</script>
 
-        function handleError() {
-            // Tremor leve (Shake)
-            input.style.transform = "translateX(5px)";
-            setTimeout(() => input.style.transform = "translateX(-5px)", 50);
-            setTimeout(() => input.style.transform = "translateX(5px)", 100);
-            setTimeout(() => input.style.transform = "translateX(0)", 150);
-            
-            // Opcional: Limpar input
-            // input.value = '';
-        }
-
-        function handleSuccess() {
-            // 1. Remove interface
-            document.getElementById('ui-box').style.opacity = 0;
-            
-            // 2. Anima o RAIO
-            bolt.classList.add('active');
-
-            // 3. Após 2 segundos admirando o raio, vai para o final
-            setTimeout(() => {
-                goToFinal();
-            }, 2500);
-        }
-
-        function goToFinal() {
-            const finalScreen = document.getElementById('final-sequence');
-            
-            // Escurece tudo
-            finalScreen.style.opacity = 1;
-            
-            // Texto surge
-            setTimeout(() => {
-                document.getElementById('end-phrase').style.opacity = 1;
-            }, 1000);
-
-            // Número surge
-            setTimeout(() => {
-                document.getElementById('digit-box').style.opacity = 1;
-            }, 4000);
-        }
-    </script>
 </body>
 </html>
