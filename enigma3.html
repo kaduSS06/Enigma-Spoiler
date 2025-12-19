@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>O Começo</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
@@ -19,9 +19,10 @@ html, body {
     height: 100%;
     font-family: 'Montserrat', sans-serif;
     background: black;
+    overflow: hidden;
 }
 
-/* INTRO */
+/* ---------- INTRO ---------- */
 #start-overlay {
     position: fixed;
     inset: 0;
@@ -31,39 +32,41 @@ html, body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    color: white;
-    text-align: center;
+    transition: opacity 1s ease;
 }
 
-#intro-text {
-    font-size: 1.2rem;
-    max-width: 80%;
+.intro-text {
+    color: #aaa;
+    font-size: 1.1rem;
+    max-width: 600px;
+    text-align: center;
+    line-height: 1.6;
     opacity: 0;
     transition: opacity 2s ease;
     margin-bottom: 40px;
 }
 
 .start-btn {
-    padding: 15px 40px;
+    padding: 14px 40px;
     border: 1px solid white;
     background: transparent;
     color: white;
     font-size: 1.1rem;
-    cursor: pointer;
     border-radius: 30px;
+    cursor: pointer;
     opacity: 0;
     transition: opacity 1.5s ease;
 }
 
-/* VÍDEO */
+/* ---------- VÍDEO ---------- */
 #video-container {
     position: fixed;
     inset: 0;
     background: black;
+    z-index: 50;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 1s ease;
-    z-index: 50;
+    transition: opacity 1.5s ease;
 }
 
 video {
@@ -72,56 +75,67 @@ video {
     object-fit: contain;
 }
 
-/* JOGO */
+/* ---------- JOGO ---------- */
 #game-container {
     position: fixed;
     inset: 0;
     background: white url('desenho.jpg') no-repeat center;
     background-size: contain;
-    opacity: 0;
-    transition: opacity 2s ease;
     z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 2s ease;
 }
 
 .ui-layer {
     position: absolute;
     bottom: 8%;
     width: 100%;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .question {
     font-size: 1.4rem;
+    color: #333;
     margin-bottom: 20px;
+    opacity: 0;
+    transition: opacity 1.5s ease;
 }
 
 input {
+    width: 80%;
+    max-width: 320px;
     padding: 12px 20px;
     border-radius: 30px;
     border: 2px solid #333;
     font-size: 1.1rem;
     text-align: center;
     outline: none;
+    opacity: 0;
+    transition: opacity 1.5s ease;
 }
 
-/* FINAL */
+/* ---------- FINAL ---------- */
 #final-sequence {
     position: fixed;
     inset: 0;
     background: black;
+    z-index: 80;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     opacity: 0;
+    pointer-events: none;
     transition: opacity 2s ease;
-    z-index: 80;
 }
 
 .final-text {
     color: white;
     font-size: 1.4rem;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
     opacity: 0;
     transition: opacity 2s ease;
 }
@@ -131,115 +145,137 @@ input {
     transition: opacity 2s ease;
 }
 
-.number-6 {
+.number {
     font-size: 8rem;
+    font-weight: 300;
     color: white;
+    text-shadow: 0 0 30px rgba(255,255,255,0.7);
 }
+
+/* ---------- ÁUDIO ---------- */
+audio { display: none; }
 </style>
 </head>
 
 <body>
 
-<!-- SONS -->
-<audio id="ambient-sound" src="ambient.mp3" loop></audio>
-<audio id="video-sound" src="video-sound.mp3"></audio>
+<audio id="ambient" src="ambiente.mp3" loop></audio>
+<audio id="melody" src="melodia-video.mp3"></audio>
 
 <!-- INTRO -->
 <div id="start-overlay">
-    <div id="intro-text">
-        Algumas memórias não começam com palavras.<br>
-        Elas apenas continuam.
+    <div class="intro-text" id="intro-text">
+        Algumas memórias não se mostram de imediato.<br>
+        Elas pedem silêncio. Atenção.<br><br>
+        E alguém disposto a olhar.
     </div>
-    <button class="start-btn" onclick="startExperience()">Iniciar Memória</button>
+    <button class="start-btn" id="start-btn">Iniciar Memória</button>
 </div>
 
 <!-- VÍDEO -->
 <div id="video-container">
-    <video id="intro-video">
+    <video id="intro-video" playsinline>
         <source src="video_intro.mp4" type="video/mp4">
     </video>
 </div>
 
 <!-- JOGO -->
 <div id="game-container">
-    <div class="ui-layer" id="ui-box">
-        <h2 class="question">Qual foi o começo?</h2>
-        <input type="text" id="answer-input" placeholder="Digite...">
+    <div class="ui-layer">
+        <div class="question" id="question">Qual foi o começo?</div>
+        <input id="answer" placeholder="Digite..." autocomplete="off">
     </div>
 </div>
 
 <!-- FINAL -->
 <div id="final-sequence">
-    <p class="final-text" id="end-phrase">Foi ali que tudo começou.</p>
-    <div class="digit-reveal" id="digit-box">
-        <span class="number-6">6</span>
+    <div class="final-text" id="final-text">Foi ali que tudo começou.</div>
+    <div class="digit-reveal" id="digit">
+        <div class="number">6</div>
     </div>
 </div>
 
 <script>
-const introText = document.getElementById('intro-text');
-const startBtn = document.querySelector('.start-btn');
-const ambient = document.getElementById('ambient-sound');
-const videoSound = document.getElementById('video-sound');
-const video = document.getElementById('intro-video');
-const videoContainer = document.getElementById('video-container');
-const overlay = document.getElementById('start-overlay');
-const game = document.getElementById('game-container');
-const input = document.getElementById('answer-input');
+const ambient = document.getElementById("ambient");
+const melody = document.getElementById("melody");
 
-// INTRO SEQUÊNCIA
-window.onload = () => {
-    ambient.volume = 0.3;
+const introText = document.getElementById("intro-text");
+const startBtn = document.getElementById("start-btn");
+const overlay = document.getElementById("start-overlay");
+
+const videoContainer = document.getElementById("video-container");
+const video = document.getElementById("intro-video");
+
+const game = document.getElementById("game-container");
+const question = document.getElementById("question");
+const input = document.getElementById("answer");
+
+const finalSeq = document.getElementById("final-sequence");
+const finalText = document.getElementById("final-text");
+const digit = document.getElementById("digit");
+
+/* INTRO TIMING */
+setTimeout(() => introText.style.opacity = 1, 800);
+setTimeout(() => startBtn.style.opacity = 1, 2800);
+
+startBtn.onclick = () => {
+    ambient.volume = 0.6;
     ambient.play();
 
-    setTimeout(() => introText.style.opacity = 1, 500);
-    setTimeout(() => startBtn.style.opacity = 1, 3000);
-};
-
-function startExperience() {
-    ambient.pause();
-    videoSound.play();
-    video.play();
+    overlay.style.opacity = 0;
+    setTimeout(() => overlay.style.display = "none", 1000);
 
     videoContainer.style.opacity = 1;
-    videoContainer.style.pointerEvents = 'auto';
-    overlay.style.opacity = 0;
+    videoContainer.style.pointerEvents = "auto";
 
-    setTimeout(() => overlay.style.display = 'none', 1000);
-}
-
-video.onended = () => {
-    videoSound.pause();
-    ambient.play();
-
-    videoContainer.style.opacity = 0;
-    setTimeout(() => {
-        videoContainer.style.display = 'none';
-        game.style.opacity = 1;
-    }, 1000);
+    ambient.volume = 0.2;
+    melody.play();
+    video.play();
 };
 
-input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') checkAnswer();
+/* FIM DO VÍDEO */
+video.onended = () => {
+    melody.pause();
+    videoContainer.style.opacity = 0;
+
+    setTimeout(() => {
+        ambient.volume = 0.4;
+    }, 2500);
+
+    setTimeout(() => {
+        videoContainer.style.display = "none";
+        game.style.opacity = 1;
+        game.style.pointerEvents = "auto";
+
+        setTimeout(() => {
+            question.style.opacity = 1;
+            input.style.opacity = 1;
+            input.focus();
+        }, 1200);
+
+    }, 3000);
+};
+
+/* RESPOSTA */
+input.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        if (input.value.trim().toLowerCase() === "senai") {
+            success();
+        } else {
+            input.style.transform = "translateX(6px)";
+            setTimeout(() => input.style.transform = "translateX(-6px)", 60);
+            setTimeout(() => input.style.transform = "translateX(0)", 120);
+        }
+    }
 });
 
-function checkAnswer() {
-    if (input.value.trim().toLowerCase() === 'senai') success();
-    else shake();
-}
-
-function shake() {
-    input.style.transform = 'translateX(5px)';
-    setTimeout(() => input.style.transform = 'translateX(-5px)', 50);
-    setTimeout(() => input.style.transform = 'translateX(0)', 100);
-}
-
 function success() {
-    document.getElementById('ui-box').style.opacity = 0;
+    game.style.opacity = 0;
+
     setTimeout(() => {
-        document.getElementById('final-sequence').style.opacity = 1;
-        setTimeout(() => document.getElementById('end-phrase').style.opacity = 1, 1000);
-        setTimeout(() => document.getElementById('digit-box').style.opacity = 1, 3000);
+        finalSeq.style.opacity = 1;
+        finalText.style.opacity = 1;
+        setTimeout(() => digit.style.opacity = 1, 2500);
     }, 2000);
 }
 </script>
