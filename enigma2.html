@@ -30,7 +30,7 @@ body.final-state #background-container {
     transform: scale(1.05);
 }
 
-/* ---------- CONTEÚDO PRINCIPAL ---------- */
+/* ---------- CONTEÚDO ---------- */
 .main-content {
     position: relative;
     z-index: 20;
@@ -84,7 +84,7 @@ button {
     transition: opacity 0.5s;
 }
 
-/* ---------- SEQUÊNCIA FINAL ---------- */
+/* ---------- FINAL ---------- */
 #final-sequence {
     position: fixed;
     inset: 0;
@@ -128,16 +128,20 @@ button {
 
 /* ---------- BOTÃO PRÓXIMO ---------- */
 #next-btn {
-    margin-top: 30px;
-    padding: 12px 34px;
+    margin-top: 35px;
+    padding: 14px 38px;
     border-radius: 30px;
     border: 1px solid white;
     background: transparent;
     color: white;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 1.5s;
+    transition: opacity 1.5s, background 0.3s;
     pointer-events: auto;
+}
+
+#next-btn:hover {
+    background: rgba(255,255,255,0.15);
 }
 </style>
 </head>
@@ -162,7 +166,7 @@ button {
         <span class="unlock-label">Dígito revelado</span>
         <span class="the-number">3</span>
 
-        <button id="next-btn" onclick="goNext()">Ir para o próximo enigma</button>
+        <button id="next-btn" onclick="goNext()">Seguir para o próximo enigma</button>
     </div>
 </div>
 
@@ -205,8 +209,7 @@ function success() {
     }, 1000);
 
     setTimeout(() => {
-        const box = document.getElementById("digit-box");
-        box.style.opacity = 1;
+        document.getElementById("digit-box").style.opacity = 1;
         document.getElementById("next-btn").style.opacity = 1;
     }, 3500);
 }
