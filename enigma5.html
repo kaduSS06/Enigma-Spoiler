@@ -445,24 +445,26 @@ typeInPaper(txt, false, () => {
         }
 
                         function revealDigit() {
-            const container = document.createElement('div');
-            container.className = "digit-reveal-container";
-            
-            // Usamos "./" para forçar o navegador a procurar na mesma pasta
-            container.innerHTML = `
-                <div class="digit-label">Dígito Final</div>
-                <div class="digit-number">1</div>
-                <br>
-                <a href="./inicio.html" style="display: block; text-decoration: none;">
-                    <button id="back-to-safe-btn" style="pointer-events: none;">🔓 ABRIR O COFRE</button>
-                </a>
-            `;
-            
-            paper.appendChild(container);
-            notebook.scrollTo({ top: notebook.scrollHeight, behavior: 'smooth' });
-        }
-        
+    const container = document.createElement('div');
+    container.className = "digit-reveal-container";
 
+    container.innerHTML = `
+        <div class="digit-label">Dígito Final</div>
+        <div class="digit-number">1</div>
+        <br>
+        <button id="back-to-safe-btn">🔓 ABRIR O COFRE</button>
+    `;
+
+    paper.appendChild(container);
+    notebook.scrollTo({ top: notebook.scrollHeight, behavior: 'smooth' });
+
+    // Navegação direta para a sala do cofre
+    document
+        .getElementById("back-to-safe-btn")
+        .addEventListener("click", () => {
+            window.location.href = "./inicio.html";
+        });
+}
     </script>
  </body>
 </html>
