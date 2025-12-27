@@ -217,27 +217,27 @@ button.check-btn {
 
     <div class="digit-container" id="digit-box">
         <span class="unlock-label">Dígito revelado</span>
-        <span class="the-number">3</span>
+        
+        <span class="the-number">9</span>
 
         <button id="next-btn" onclick="goNext()">Seguir para o próximo enigma</button>
     </div>
 </div>
 
 <script>
-    // --- SISTEMA DE ÁUDIO SINTÉTICO ---
-    // Cria o contexto de áudio (o "gerador" de sons do navegador)
+    // --- SISTEMA DE ÁUDIO SINTÉTICO (GERADO VIA CÓDIGO) ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // Função para tocar som de erro (Bzzzt grave)
+    // Som de Erro (Bzzzt)
     function playErrorSound() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
 
-        osc.type = 'sawtooth'; // Onda dente de serra (som mais "áspero")
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime); // Começa grave
-        osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3); // Cai rapidinho
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime); 
+        osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3); 
 
         gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
@@ -249,19 +249,19 @@ button.check-btn {
         osc.stop(audioCtx.currentTime + 0.3);
     }
 
-    // Função para tocar som suave da intro (Ping delicado)
+    // Som de Intro (Ping Suave)
     function playIntroTone() {
         if (audioCtx.state === 'suspended') audioCtx.resume();
 
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
 
-        osc.type = 'sine'; // Onda senoidal (som puro e suave)
-        osc.frequency.setValueAtTime(440, audioCtx.currentTime); // Nota Lá
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime); 
         
         gain.gain.setValueAtTime(0, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.1); // Fade in
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5); // Fade out longo
+        gain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.1); 
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5); 
 
         osc.connect(gain);
         gain.connect(audioCtx.destination);
@@ -282,9 +282,8 @@ button.check-btn {
 
     window.onload = () => {
         lines.forEach((step, index) => {
-            // Toca o som suave e mostra o texto
             setTimeout(() => {
-                playIntroTone(); // Som sintético aqui!
+                playIntroTone(); 
                 document.getElementById(step.id).style.opacity = "1";
             }, currentTime);
 
@@ -307,7 +306,6 @@ button.check-btn {
     };
 
     function startFragment() {
-        // Garante que o áudio está ligado quando clica no botão
         if (audioCtx.state === 'suspended') audioCtx.resume();
 
         const intro = document.getElementById('intro-overlay');
@@ -345,9 +343,7 @@ button.check-btn {
         if (validAnswers.includes(value)) {
             success();
         } else {
-            // TOCA O SOM DE ERRO SINTÉTICO
-            playErrorSound();
-
+            playErrorSound(); // Som de erro
             feedback.style.opacity = 1;
             document.getElementById("ui").style.transform = "translateX(5px)";
             setTimeout(() => document.getElementById("ui").style.transform = "translateX(-5px)", 80);
@@ -358,9 +354,9 @@ button.check-btn {
     function success() {
         successSound.play().catch(e => console.log("Erro som:", e));
 
-        // Salva progresso
         localStorage.setItem("enigma2_resolvido", "true");
-        localStorage.setItem("digito_enigma2", "3");
+        // Salva o dígito 9
+        localStorage.setItem("digito_enigma2", "9");
 
         const ui = document.getElementById("ui");
         ui.style.opacity = 0;
@@ -379,7 +375,8 @@ button.check-btn {
     }
 
     function goNext() {
-        window.location.href = "enigma4.html";
+        // MUDANÇA: Leva para o Index (Spoiler)
+        window.location.href = "index.html";
     }
 
     input.addEventListener("keydown", e => {

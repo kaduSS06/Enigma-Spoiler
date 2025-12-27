@@ -107,7 +107,7 @@
             text-decoration: none; font-family: 'Montserrat', sans-serif;
             text-transform: uppercase; font-size: 0.9rem;
             
-            /* CORREÇÃO AQUI: Começa sem clique */
+            /* CORREÇÃO IMPORTANTE: Botão intangível no início */
             pointer-events: none; 
         }
 
@@ -141,8 +141,10 @@
   <div id="end-screen">
    <div class="final-text">Primeiras conversas guardam os melhores segredos.</div>
    <div class="label-unlock">Dígito Desbloqueado</div>
-   <div class="digit-reveal" id="final-digit">9</div>
-   <a href="enigma2.html" id="next-btn">Continuar Jornada</a>
+   
+   <div class="digit-reveal" id="final-digit">3</div>
+   
+   <a href="enigma4.html" id="next-btn">Continuar Jornada</a>
   </div>
 
   <script>
@@ -259,7 +261,7 @@
             
             setTimeout(() => {
                 nextBtn.style.opacity = 1;
-                // CORREÇÃO AQUI: Ativa o clique só agora
+                // CORREÇÃO: Torna o botão clicável apenas agora
                 nextBtn.style.pointerEvents = "auto"; 
             }, 5000);
         }
