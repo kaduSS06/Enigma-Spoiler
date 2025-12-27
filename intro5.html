@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>O Último Fragmento</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -12,26 +12,38 @@
             color: white;
             font-family: 'Montserrat', sans-serif;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            width: 100vw;
             overflow: hidden;
+            position: relative; /* Necessário para o posicionamento absoluto funcionar bem */
         }
 
         .intro-line {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            max-width: 80%;
+            font-size: 1.5rem; /* Texto um pouco maior */
+            font-weight: 400;
+            line-height: 1.4;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            
+            /* O SEGREDO DA CENTRALIZAÇÃO */
             position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            
             opacity: 0;
             transition: opacity 1.5s ease;
-            font-weight: 300;
             letter-spacing: 1px;
+            margin: 0;
         }
 
         #start-diary-btn {
+            /* Centralização do botão */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
             padding: 15px 35px;
             border: 1px solid rgba(255,255,255,0.4);
             background: transparent;
@@ -44,6 +56,7 @@
             display: none;
             text-transform: uppercase;
             letter-spacing: 2px;
+            white-space: nowrap; /* Evita que o texto do botão quebre */
         }
 
         #start-diary-btn:hover {
@@ -54,21 +67,18 @@
 </head>
 <body>
 
-    <div id="intro-container">
-        <p class="intro-line" id="l1">Chegamos ao último fragmento.</p>
-        <p class="intro-line" id="l2">Algumas histórias não são escritas apenas com palavras...</p>
-        <p class="intro-line" id="l3">...mas com o tempo que dedicamos um ao outro.</p>
-        <p class="intro-line" id="l4">Este é o registro do que fomos e do que ainda seremos.</p>
-        
-        <button id="start-diary-btn" onclick="openDiary()">Abrir o Diário</button>
-    </div>
+    <p class="intro-line" id="l1">Que isso, já está aqui?</p>
+    <p class="intro-line" id="l2">Espero que esteja gostando.</p>
+    <p class="intro-line" id="l3">Então vamos para o último jogo...</p>
+    
+    <button id="start-diary-btn" onclick="openDiary()">Abrir o Diário</button>
 
     <script>
+        // Configuração do tempo de cada frase
         const lines = [
-            { id: 'l1', duration: 4000 },
-            { id: 'l2', duration: 4500 },
-            { id: 'l3', duration: 4500 },
-            { id: 'l4', duration: 5000 }
+            { id: 'l1', duration: 3500 }, // Mais curto pois a frase é curta
+            { id: 'l2', duration: 3500 },
+            { id: 'l3', duration: 4000 }
         ];
 
         let delay = 500;
@@ -80,19 +90,22 @@
                     document.getElementById(line.id).style.opacity = "1";
                 }, delay);
 
-                // Desaparece o texto (menos o último)
+                // Desaparece o texto
                 if (index < lines.length - 1) {
                     setTimeout(() => {
                         document.getElementById(line.id).style.opacity = "0";
                     }, delay + line.duration - 1000);
                 } else {
-                    // Após o último texto sumir, mostra o botão
+                    // Após a última frase, ela some e o botão aparece
                     setTimeout(() => {
                         document.getElementById(line.id).style.opacity = "0";
                         setTimeout(() => {
                             const btn = document.getElementById('start-diary-btn');
                             btn.style.display = "block";
-                            setTimeout(() => btn.style.opacity = "1", 100);
+                            // Pequeno delay para a transição de opacidade funcionar
+                            requestAnimationFrame(() => {
+                                btn.style.opacity = "1";
+                            });
                         }, 1000);
                     }, delay + line.duration);
                 }
@@ -101,7 +114,7 @@
         };
 
         function openDiary() {
-            // Leva para o enigma5.html que você já tem
+            // Leva para o enigma5.html
             window.location.href = "enigma5.html";
         }
     </script>
