@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SPOILER WARNING</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700;900&display=swap" rel="stylesheet">
   <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700;900&display=swap');
-
         /* === GERAL === */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body, html {
@@ -17,85 +16,70 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* === CONTAINER RESPONSIVO === */
-        #game-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            
-            /* --- CONFIGURAÇÃO PADRÃO (PC / DEITADO) --- */
-            background: url('fundo-pc.jpg') no-repeat center center;
-            background-size: cover; 
-            
-            transition: filter 1.5s ease-in-out, opacity 1.5s ease-in-out;
+        /* === INTRODUÇÃO (NOVO) === */
+        #intro-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 30px;
         }
 
-        /* --- CONFIGURAÇÃO MOBILE (CELULAR / EM PÉ) --- */
+        .intro-line {
+            font-size: 1.3rem; line-height: 1.6; max-width: 600px;
+            opacity: 0; transition: opacity 1s ease; position: absolute;
+        }
+
+        .spoiler-big {
+            font-size: 3rem; font-weight: 900; color: #ff3333; letter-spacing: 5px;
+        }
+
+        #start-game-btn {
+            margin-top: 20px; padding: 12px 35px;
+            border: 1px solid rgba(255,255,255,0.6); background: transparent;
+            color: white; border-radius: 30px; font-size: 1rem; cursor: pointer;
+            opacity: 0; transition: opacity 1s; display: none; z-index: 110;
+        }
+
+        /* === CONTAINER RESPONSIVO === */
+        #game-container {
+            position: relative; width: 100%; height: 100%;
+            background: url('fundo-pc.jpg') no-repeat center center;
+            background-size: cover; 
+            transition: filter 1.5s ease-in-out, opacity 1.5s ease-in-out;
+            opacity: 0; /* Começa invisível */
+        }
+
         @media (orientation: portrait) {
-            #game-container {
-                background-image: url('fundo-mobile.jpg');
-            }
-
-            /* AJUSTE DAS ZONAS DE CLIQUE NO CELULAR */
-            /* Você precisará ajustar essas porcentagens para bater com sua imagem mobile */
-            #rooster-spot {
-                top: 40% !important; 
-                left: 5% !important; 
-                width: 25% !important;
-                height: 20% !important;
-            }
-
-            #duck-spot {
-                top: 42% !important; 
-                right: 5% !important; 
-                width: 25% !important;
-                height: 20% !important;
-            }
+            #game-container { background-image: url('fundo-mobile.jpg'); }
             
-            .input-area {
-                margin-top: 60% !important; 
-            }
+            /* Ajuste as posições para o celular aqui */
+            #rooster-spot { top: 40% !important; left: 5% !important; width: 25% !important; height: 20% !important; }
+            #duck-spot { top: 42% !important; right: 5% !important; width: 25% !important; height: 20% !important; }
+            .input-area { margin-top: 60% !important; }
         }
         
         /* === CAMADA DE CLIQUES === */
         .click-spot {
-            position: absolute;
-            cursor: pointer;
-            pointer-events: auto;
-            opacity: 0; 
-            z-index: 20;
-            /* DICA: Mude opacity para 0.5 e background red para ver onde estão as caixas se precisar ajustar */
+            position: absolute; cursor: pointer; pointer-events: auto;
+            opacity: 0; z-index: 20;
         }
 
-        /* === POSIÇÕES PADRÃO (PC) === */
-        #rooster-spot {
-            top: 38%; left: 12%; width: 18%; height: 28%;
-        }
-
-        #duck-spot {
-            top: 40%; right: 12%; width: 18%; height: 28%;
-        }
+        #rooster-spot { top: 38%; left: 12%; width: 18%; height: 28%; }
+        #duck-spot { top: 40%; right: 12%; width: 18%; height: 28%; }
 
         /* === INTERFACE (UI) === */
         .ui-layer {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 30;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center;
             pointer-events: none; text-align: center;
         }
 
-        /* Título invisível para acessibilidade */
-        h1.spoiler-title {
-            font-size: 5vw; margin-bottom: 2rem; opacity: 0; pointer-events: none;
-        }
+        h1.spoiler-title { font-size: 5vw; margin-bottom: 2rem; opacity: 0; pointer-events: none; }
         
         .input-area {
-            pointer-events: auto;
-            display: flex; flex-direction: column; align-items: center; gap: 15px;
-            width: 80%; max-width: 350px;
-            background: rgba(0,0,0,0.6); 
+            pointer-events: auto; display: flex; flex-direction: column; align-items: center; gap: 15px;
+            width: 80%; max-width: 350px; background: rgba(0,0,0,0.6); 
             padding: 20px; border-radius: 10px; backdrop-filter: blur(4px);
-            margin-top: 15%; /* Posição no PC */
+            margin-top: 15%;
         }
 
         input {
@@ -118,26 +102,29 @@
         .digit-reveal.show { opacity: 1; transform: scale(1); }
         .label-unlock { font-size: 0.8rem; color: #666; letter-spacing: 4px; text-transform: uppercase; }
 
-        /* Botão Próxima Fase */
         #next-btn {
-            margin-top: 40px;
-            padding: 12px 30px;
-            border: 1px solid white;
-            background: transparent;
-            color: white;
-            border-radius: 25px;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 1s;
-            text-decoration: none; /* Remove sublinhado */
-            font-family: 'Montserrat', sans-serif;
-            text-transform: uppercase;
-            font-size: 0.9rem;
+            margin-top: 40px; padding: 12px 30px; border: 1px solid white;
+            background: transparent; color: white; border-radius: 25px;
+            cursor: pointer; opacity: 0; transition: opacity 1s;
+            text-decoration: none; font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase; font-size: 0.9rem; pointer-events: auto;
         }
 
     </style>
  </head>
  <body>
+
+  <audio id="bg-sound" src="ambiente.mp3" loop></audio>
+  <audio id="success-sound" src="lock-correct.mp3"></audio>
+
+  <div id="intro-overlay">
+    <p class="intro-line" id="t1">Depois que começamos a ler e assistir coisas juntos...</p>
+    <p class="intro-line" id="t2">Alguns acidentes aconteceram no caminho.</p>
+    <p class="intro-line spoiler-big" id="t3">SPOILER.</p>
+    <p class="intro-line" id="t4">Você se lembra qual foi um dos primeiros?</p>
+    <button id="start-game-btn" onclick="startGame()">Enfrentar o Spoiler</button>
+  </div>
+
   <div id="game-container">
    <div class="click-spot" id="rooster-spot"></div>
    <div class="click-spot" id="duck-spot"></div>
@@ -149,18 +136,71 @@
     </div>
    </div>
   </div>
+
   <div id="end-screen">
    <div class="final-text">Primeiras conversas guardam os melhores segredos.</div>
    <div class="label-unlock">Dígito Desbloqueado</div>
    <div class="digit-reveal" id="final-digit">9</div>
    <a href="enigma2.html" id="next-btn">Continuar Jornada</a>
   </div>
+
   <script>
+        // --- INTRODUÇÃO ---
+        const lines = [
+            { id: 't1', duration: 3500 },
+            { id: 't2', duration: 3500 },
+            { id: 't3', duration: 2500 }, // Spoiler em vermelho dura menos para impacto
+            { id: 't4', duration: 3500 }
+        ];
+
+        let currentTime = 500;
+
+        window.onload = () => {
+            lines.forEach((step, index) => {
+                setTimeout(() => {
+                    document.getElementById(step.id).style.opacity = "1";
+                }, currentTime);
+
+                if (index < lines.length - 1) {
+                    setTimeout(() => {
+                        document.getElementById(step.id).style.opacity = "0";
+                    }, currentTime + step.duration - 800);
+                } else {
+                    setTimeout(() => {
+                        document.getElementById(step.id).style.opacity = "0";
+                        setTimeout(() => {
+                            const btn = document.getElementById('start-game-btn');
+                            btn.style.display = "block";
+                            setTimeout(() => btn.style.opacity = "1", 100);
+                        }, 800);
+                    }, currentTime + step.duration);
+                }
+                currentTime += step.duration;
+            });
+        };
+
+        function startGame() {
+            // Tenta iniciar áudio ambiente
+            document.getElementById('bg-sound').volume = 0.5;
+            document.getElementById('bg-sound').play().catch(e=>{});
+
+            const intro = document.getElementById('intro-overlay');
+            const container = document.getElementById('game-container');
+            
+            intro.style.transition = "opacity 1.5s";
+            intro.style.opacity = "0";
+            
+            setTimeout(() => {
+                intro.style.display = "none";
+                container.style.opacity = "1";
+            }, 1500);
+        }
+
+        // --- LÓGICA DO JOGO ---
         let roosterCaught = false;
         let duckCaught = false;
 
         function flashSpot(element) {
-            // Flash visual sutil
             element.style.opacity = 1;
             element.style.backgroundColor = "rgba(255, 255, 255, 0.3)"; 
             setTimeout(() => { 
@@ -192,6 +232,11 @@
         }
 
         function triggerEndSequence() {
+            // Toca som de sucesso
+            const successAudio = document.getElementById('success-sound');
+            successAudio.volume = 1.0;
+            successAudio.play().catch(e=>{});
+
             const container = document.getElementById('game-container');
             const ui = document.getElementById('game-ui');
             const endScreen = document.getElementById('end-screen');
@@ -213,13 +258,12 @@
                 document.getElementById('final-digit').classList.add('show');
             }, 3500);
             
-            // Botão aparece por último
             setTimeout(() => {
                 nextBtn.style.opacity = 1;
             }, 5000);
         }
 
-        // LÓGICA DE TEXTO ORIGINAL
+        // --- TEXTO (FEEDBACK) ---
         const input = document.getElementById('spoiler-input');
         const feedback = document.getElementById('feedback');
         
