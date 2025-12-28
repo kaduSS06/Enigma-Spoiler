@@ -1,396 +1,133 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-br">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>O Cofre</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&amp;display=swap" rel="stylesheet">
-  <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>O Cofre de Memórias</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: #0a0a0a;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; overflow-x: hidden; padding: 20px;
+        }
 
-html, body {
-    width: 100%;
-    height: 100%;
-    font-family: 'Montserrat', sans-serif;
-    background: black;
-    color: white;
-    overflow: hidden;
-}
+        /* --- UI DO COFRE --- */
+        #safe-ui { text-align: center; transition: opacity 1s; }
+        h1 { font-size: 1.5rem; margin-bottom: 25px; letter-spacing: 2px; color: #ccc; }
+        
+        .display {
+            background: #1a1a1a; padding: 20px; border-radius: 10px;
+            font-size: 2.5rem; letter-spacing: 10px; margin-bottom: 30px;
+            border: 1px solid #333; min-width: 200px; height: 80px;
+            display: flex; align-items: center; justify-content: center;
+        }
 
-/* ESCONDE TUDO ATÉ CARREGAR */
-body {
-    visibility: hidden;
-}
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 280px; }
+        .key {
+            background: #222; border: 1px solid #444; color: white;
+            padding: 20px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
+            transition: all 0.2s; width: 70px; height: 70px;
+        }
+        .key:active { background: #444; transform: scale(0.9); }
+        .key.clear { background: #3d1010; border-color: #611; }
 
-/* ---------- VINHETA ---------- */
-#vignette {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.85) 100%);
-    pointer-events: none;
-    z-index: 200;
-    opacity: 0;
-    transition: opacity 2s ease;
-}
+        /* --- CONTAINER DO VÍDEO --- */
+        #video-container {
+            display: none; width: 100%; max-width: 800px;
+            animation: fadeIn 2s ease-in;
+        }
+        .video-wrapper {
+            position: relative; padding-bottom: 177.77%; /* Proporção 9:16 para vídeos de celular */
+            height: 0; overflow: hidden; border-radius: 15px; box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        .video-wrapper iframe {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
 
-/* ---------- PRÓLOGO ---------- */
-#intro {
-    position: fixed;
-    inset: 0;
-    background: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 40px;
-    z-index: 100;
-}
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
 
-.intro-text {
-    font-size: 1.4rem;
-    opacity: 0;
-    transition: opacity 1.5s;
-    max-width: 600px;
-    line-height: 1.6;
-}
+    <audio id="success-sound" src="lock-correct.mp3"></audio>
 
-#start-btn {
-    position: absolute;
-    bottom: 12%;
-    padding: 14px 36px;
-    border: 1px solid white;
-    background: transparent;
-    color: white;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    cursor: pointer;
-}
+    <div id="safe-ui">
+        <h1>INSIRA A SENHA FINAL</h1>
+        <div class="display" id="display">-----</div>
+        <div class="keypad">
+            <button class="key" onclick="press(1)">1</button>
+            <button class="key" onclick="press(2)">2</button>
+            <button class="key" onclick="press(3)">3</button>
+            <button class="key" onclick="press(4)">4</button>
+            <button class="key" onclick="press(5)">5</button>
+            <button class="key" onclick="press(6)">6</button>
+            <button class="key" onclick="press(7)">7</button>
+            <button class="key" onclick="press(8)">8</button>
+            <button class="key" onclick="press(9)">9</button>
+            <button class="key clear" onclick="clearDisplay()">C</button>
+            <button class="key" onclick="press(0)">0</button>
+        </div>
+    </div>
 
-/* BOTÃO DE PULAR (NOVO) */
-#skip-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 8px 15px;
-    border: 1px solid #444;
-    background: rgba(0,0,0,0.5);
-    color: #888;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    text-transform: uppercase;
-    z-index: 150;
-}
+    <div id="video-container">
+        <h2 style="margin-bottom: 20px; font-weight: 300;">Para: Larissa</h2>
+        <div class="video-wrapper">
+            <iframe 
+                id="yt-player"
+                src="https://youtu.be/Ex6bqs_ac50?si=9VsPA_RjcnMOJe4T" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        </div>
+    </div>
 
-/* ---------- SALA ---------- */
-#dark-room {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at center, #111 0%, #000 75%);
-    display: none;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 2.5s ease;
-    z-index: 50;
-}
+    <script>
+        const PASSWORD = [6, 9, 3, 2, 1]; // Sua senha baseada nos enigmas
+        let input = [];
 
-#chest {
-    width: 260px;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%) scale(1);
-    transition: transform 0.8s ease;
-    box-shadow: 0 0 40px rgba(255,255,255,0.12);
-}
+        function press(num) {
+            if (input.length < 5) {
+                input.push(num);
+                updateDisplay();
+                if (input.length === 5) check();
+            }
+        }
 
-#approach-button {
-    position: absolute;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 14px 36px;
-    border: 1px solid rgba(255,255,255,0.4);
-    background: transparent;
-    color: white;
-    border-radius: 30px;
-    font-size: 0.9rem;
-    letter-spacing: 3px;
-    cursor: pointer;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 1.2s ease;
-}
+        function clearDisplay() {
+            input = [];
+            updateDisplay();
+        }
 
-/* ---------- COFRE ---------- */
-#vault {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at center, #222 0%, #000 70%);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 1.5s ease;
-}
+        function updateDisplay() {
+            const display = document.getElementById('display');
+            display.innerText = input.map(() => '•').join('').padEnd(5, '-');
+        }
 
-.dials {
-    display: flex;
-    gap: 16px;
-}
-
-.dial {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.dial button {
-    background: transparent;
-    border: none;
-    color: rgba(255,255,255,0.6);
-    font-size: 1.4rem;
-    cursor: pointer;
-    padding: 10px;
-}
-
-.number {
-    font-size: 2.4rem;
-    margin: 8px 0;
-    transition: transform 0.15s;
-}
-
-.number.pop {
-    transform: scale(1.2);
-}
-
-.hint-container {
-    margin-top: 40px;
-    text-align: center;
-    height: 70px;
-}
-
-.hint {
-    font-size: 0.9rem;
-    color: #aaa;
-    opacity: 0.7;
-    transition: opacity 0.5s;
-}
-
-/* ---------- BOTÃO JORNADA ---------- */
-#journey-btn {
-    display: none;
-    margin-top: 12px;
-    padding: 12px 30px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.5);
-    color: white;
-    border-radius: 25px;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    font-size: 0.75rem;
-}
-
-audio { display: none; }
-</style>
- </head>
- <body>
-  <div id="vignette"></div>
-  <audio id="ambient" src="ambiente.mp3" loop></audio>
-  <audio id="sfx-tick" src="tick.mp3"></audio>
-  <audio id="sfx-response" src="vault-response.mp3"></audio>
-  <div id="intro">
-   <button id="skip-btn" onclick="skipIntro()">⏩ Pular Intro</button>
-   <div class="intro-text" id="text"></div>
-   <button id="start-btn">Iniciar</button>
-  </div>
-  <div id="dark-room">
-   <img id="chest" src="cofre.png" alt="Cofre">
-   <button id="approach-button">APROXIMAR-SE</button>
-  </div>
-  <div id="vault">
-   <div class="dials" id="dials"></div>
-   <div class="hint-container">
-    <div class="hint" id="hint-msg">Talvez nem tudo se abra de primeira.</div>
-    <button id="journey-btn" onclick="startJourney()">Voltar ao começo</button>
-   </div>
-  </div>
-  <script>
-document.addEventListener("DOMContentLoaded", () => {
-    document.body.style.visibility = "visible";
-});
-
-const textEl = document.getElementById("text");
-const intro = document.getElementById("intro");
-const startBtn = document.getElementById("start-btn");
-const darkRoom = document.getElementById("dark-room");
-const approachBtn = document.getElementById("approach-button");
-const chest = document.getElementById("chest");
-const vault = document.getElementById("vault");
-const vignette = document.getElementById("vignette");
-const hintMsg = document.getElementById("hint-msg");
-const journeyBtn = document.getElementById("journey-btn");
-
-const ambient = document.getElementById("ambient");
-const sfxTick = document.getElementById("sfx-tick");
-const sfxResponse = document.getElementById("sfx-response");
-
-ambient.volume = 0.6;
-sfxTick.volume = 0.4;
-sfxResponse.volume = 0.8;
-
-// --- NOVA FUNÇÃO SIMPLES E DIRETA ---
-function skipIntro() {
-    // Esconde a intro
-    intro.style.display = "none";
-    
-    // Mostra a sala
-    darkRoom.style.display = "block";
-    darkRoom.style.opacity = 1;
-    darkRoom.style.pointerEvents = "auto";
-    vignette.style.opacity = 1;
-    
-    approachBtn.style.opacity = 1;
-    approachBtn.style.pointerEvents = "auto";
-
-    // Tenta tocar o som
-    if(ambient.paused) ambient.play().catch(e => console.log("Audio precisa de clique"));
-}
-
-const lines = [
-    "Algumas coisas não foram feitas para serem abertas de imediato.",
-    "Elas esperam.",
-    "Não por tempo...",
-    "Mas pela pessoa certa.",
-    "Este cofre ficou aqui por muito tempo.",
-    "Guardando fragmentos.",
-    "Começos.",
-    "Lembranças.",
-    "Se você está vendo isso agora...",
-    "Talvez seja porque chegou a hora de tentar."
-];
-
-let index = 0;
-
-function showNextLine() {
-    // Se a intro já foi pulada (display none), para o loop
-    if (intro.style.display === "none") return;
-
-    if (index >= lines.length) {
-        setTimeout(() => {
-            intro.style.opacity = 0;
-            setTimeout(() => {
-                if (intro.style.display === "none") return; // Checagem dupla
-                intro.style.display = "none";
-                darkRoom.style.display = "block";
-                vignette.style.opacity = 1;
+        function check() {
+            if (JSON.stringify(input) === JSON.stringify(PASSWORD)) {
+                unlock();
+            } else {
                 setTimeout(() => {
-                    darkRoom.style.opacity = 1;
-                    darkRoom.style.pointerEvents = "auto";
-                    setTimeout(() => {
-                        approachBtn.style.opacity = 1;
-                        approachBtn.style.pointerEvents = "auto";
-                    }, 2000);
-                }, 50);
-            }, 1500);
-        }, 2000);
-        return;
-    }
+                    alert("Senha Incorreta");
+                    clearDisplay();
+                }, 300);
+            }
+        }
 
-    textEl.style.opacity = 0;
-    setTimeout(() => {
-        if (intro.style.display === "none") return; // Checagem dupla
-        textEl.innerText = lines[index++];
-        textEl.style.opacity = 1;
-        setTimeout(showNextLine, 2600);
-    }, 800);
-}
-
-startBtn.onclick = () => {
-    ambient.play();
-    startBtn.style.display = "none";
-    showNextLine();
-};
-
-approachBtn.onclick = () => {
-    if(ambient.paused) ambient.play(); 
-
-    chest.style.transform = "translate(-50%, -50%) scale(1.5)";
-    setTimeout(() => {
-        darkRoom.style.opacity = 0;
-        setTimeout(() => {
-            darkRoom.style.display = "none";
-            vault.style.display = "flex";
+        function unlock() {
+            document.getElementById('success-sound').play();
+            document.getElementById('safe-ui').style.opacity = '0';
+            
             setTimeout(() => {
-                vault.style.opacity = 1;
-                vault.style.pointerEvents = "auto";
-            }, 50);
-        }, 800);
-    }, 500);
-};
-
-const PASSWORD = [6,9,3,2,1];
-const dials = document.getElementById("dials");
-let values = [0,0,0,0,0];
-let isSolved = false;
-let interactionCount = 0;
-
-values.forEach((_, i) => {
-    const dial = document.createElement("div");
-    dial.className = "dial";
-
-    const up = document.createElement("button");
-    up.innerText = "▲";
-    up.onclick = () => update(i, 1);
-
-    const num = document.createElement("div");
-    num.className = "number";
-    num.innerText = "0";
-
-    const down = document.createElement("button");
-    down.innerText = "▼";
-    down.onclick = () => update(i, -1);
-
-    dial.append(up, num, down);
-    dials.appendChild(dial);
-    dial.num = num;
-});
-
-function update(i, delta) {
-    if (isSolved) return;
-
-    values[i] = (values[i] + delta + 10) % 10;
-    const numEl = dials.children[i].num;
-    numEl.innerText = values[i];
-
-    numEl.classList.remove("pop");
-    void numEl.offsetWidth;
-    numEl.classList.add("pop");
-
-    sfxTick.currentTime = 0;
-    sfxTick.play();
-
-    interactionCount++;
-    if (interactionCount === 5 && !isSolved) {
-        hintMsg.innerText = "Para abrir o final, talvez seja preciso voltar.";
-        journeyBtn.style.display = "inline-block";
-    }
-
-    if (values.every((v, idx) => v === PASSWORD[idx])) {
-        isSolved = true;
-        sfxResponse.play();
-        hintMsg.innerText = "O mecanismo respondeu...";
-        journeyBtn.style.display = "none";
-        // AQUI PODE COLOCAR O FINAL (Mensagem ou alerta)
-    }
-}
-
-function startJourney() {
-    window.location.href = "enigma3.html"; // Ajustei para o enigma2 (seu primeiro enigma)
-}
-</script>
- </body>
+                document.getElementById('safe-ui').style.display = 'none';
+                const video = document.getElementById('video-container');
+                video.style.display = 'block';
+            }, 1000);
+        }
+    </script>
+</body>
 </html>
