@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>New File</title>
-</head>
-<body>
-<h1>Hello World</h1>
-</body>
-</html>th=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!doctype html>
+<html lang="pt-br">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Enigma 5 - O Diário Final</title>
   <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&amp;family=Bangers&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
   <style>
@@ -91,7 +87,7 @@
         #name-input-area { display: none; margin-top: 10px; pointer-events: all; background: #fff; padding: 5px; border: 2px solid #000; box-shadow: 4px 4px 0 rgba(0,0,0,0.8); }
         input { border: none; padding: 10px; font-family: 'Space Mono'; outline: none; font-weight: bold; font-size: 1rem; width: 180px; }
 
-        /* Estilo NOVO para a Revelação Final */
+        /* Estilo para a Revelação Final */
         .digit-reveal-container {
             margin-top: 60px;
             margin-bottom: 30px;
@@ -146,6 +142,13 @@
    </div>
   </div>
   <script>
+        // ====================================================
+        // MODO DE TESTE (CHEAT MODE)
+        // Está DESLIGADO (false) para a apresentação real.
+        // ====================================================
+        const DEBUG_MODE = false; 
+        // ====================================================
+
         const paper = document.getElementById('paper-content');
         const bubble = document.getElementById('henrique-bubble');
         const interaction = document.getElementById('interaction-area');
@@ -228,6 +231,11 @@
 
         // --- ATO 1 ---
         window.onload = () => {
+            if (DEBUG_MODE) {
+                revealDigit();
+                return;
+            }
+
             setTimeout(() => {
                 typeInPaper("Alice e Henrique — Uma amizade improvável em Harvard (por Henrique)", true, () => {
                     talk("Espera... tem alguém aí? Eu... eu não esperava visitas agora. Quem é você? Como você entrou aqui?", [
@@ -421,6 +429,7 @@ typeInPaper(txt, false, () => {
         }
 
         function revealDigit() {
+            // 1. Mostra o número no papel (visual)
             const container = document.createElement('div');
             container.className = "digit-reveal-container";
             container.innerHTML = `
@@ -428,8 +437,37 @@ typeInPaper(txt, false, () => {
                 <div class="digit-number">1</div>
             `;
             paper.appendChild(container);
-            // Scroll suave até o fim
             notebook.scrollTo({ top: notebook.scrollHeight, behavior: 'smooth' });
+
+            // 2. CRIA O BOTÃO QUE IGNORA A ROTAÇÃO DO LIVRO (SOLUÇÃO MOBILE)
+            const exitBtn = document.createElement('button');
+            exitBtn.innerText = "VOLTAR AO COFRE";
+            
+            // Estilo "ignora tudo e fica no topo"
+            Object.assign(exitBtn.style, {
+                position: 'fixed',
+                bottom: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: '10000', // Z-Index altíssimo
+                padding: '15px 30px',
+                background: '#b71c1c',
+                color: 'white',
+                border: '2px solid white',
+                borderRadius: '30px',
+                fontFamily: 'Space Mono, monospace',
+                fontWeight: 'bold',
+                fontSize: '1rem',
+                boxShadow: '0 0 20px rgba(0,0,0,0.8)',
+                pointerEvents: 'auto',
+                cursor: 'pointer'
+            });
+
+            exitBtn.onclick = () => {
+                window.location.href = 'inicio.html';
+            };
+
+            document.body.appendChild(exitBtn);
         }
 
     </script>
