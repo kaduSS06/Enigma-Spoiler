@@ -428,6 +428,9 @@ function update(i, delta) {
 
     if (values.every((v, idx) => v === PASSWORD[idx])) {
         isSolved = true;
+        
+        ambient.pause(); // AQUI ESTÁ A ALTERAÇÃO: O som para imediatamente.
+
         sfxResponse.play();
         hintMsg.innerText = "Aberto.";
         journeyBtn.style.display = "none";
